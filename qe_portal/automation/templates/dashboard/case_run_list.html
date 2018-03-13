@@ -1,0 +1,45 @@
+{% extends 'dashboard/frame.html' %}
+
+{% block main_content %}
+    <h1>Run List</h1>
+    <form method="POST" class="post-form">{% csrf_token %}
+         <div class="table-responsive">
+            <table class="table table-striped">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Case</th>
+                  <th>Suite</th>
+                  <th>Run Time</th>
+                  <th>Return Code</th>
+                  <th>Error Message</th>
+                  <th>Task ID</th>
+                </tr>
+              </thead>
+              <tbody>
+              {% for run in runs %}
+                <tr>
+                  <td>{{ run.pk }}</td>
+                  <td>{{ run.case.name }}</td>
+                  <td>{{ run.suite.name }} </td>
+                  <td>{{ run.run_time }}</td>
+                  <td>
+                      {% if run.ret_code %}
+                      <span class="case_run_ret">
+                          <img src="/static/dashboard/images/32x32/failed.png" alt="failed" style="width:18px;height:18px;border:0;">
+                      </span>
+                      {% else %}
+                      <span class="case_run_ret">
+                          <img src="/static/dashboard/images/32x32/success.png" alt="successful" style="width:18px;height:18px;border:0;">
+                      </span>
+                      {% endif %}
+                  </td>
+                  <td>{{ run.error_msg }} </td>
+                  <td>{{ run.task_id }} </td>
+                </tr>
+              {% endfor %}
+             </tbody>
+            </table>
+         </div>
+    </form>
+{% endblock %}

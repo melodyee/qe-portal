@@ -1,0 +1,132 @@
+{% extends 'dashboard/frame.html' %}
+
+{% block main_content %}
+
+    <h1>Schedule List</h1>
+
+    <form method="POST" class="post-form">
+    {% csrf_token %}
+
+<script>
+    $(document).ready(function() {
+         var progressBar = $('.progress-bar');
+         var percentVal = 0;
+
+         window.setInterval( function(){
+             $('.run_now').each(function(i, obj){
+                 var sched_id = $(this).attr('param');
+                 var sched_run_id = $(this).attr('run_id');
+                 var csrftoken = Cookies.get('csrftoken');
+                 function csrfSafeMethod(method) {
+                 // these HTTP methods do not require CSRF protection
+                    return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method)); }
+
+                 $.ajaxSetup({
+                    beforeSend: function(xhr, settings) {
+                        if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                            xhr.setRequestHeader("X-CSRFToken", csrftoken);
+                        }
+                    }
+                 });
+
+                 $.ajax({
+                    url: '/dashboard/scheduler_list',
+                    type: 'get',
+                    async: false,
+                    data: {'sched_id':sched_id, 'sched_run_id':sched_run_id, 'csrfmiddlewaretoken': "{{ csrftoken }}" },
+                    dataType: 'json',
+                    context: this,
+                    success: function(json){
+                        console.log("successfull");
+                        //alert(json)
+                        var sched_id = json.sched_id;
+                        var sched_run_id = json.sched_run_id;
+                        var sched_progress = json.sched_progress;
+                        //alert(sched_id + "," + sched_run_id);
+                        var percentVal = sched_progress
+                        alert (percentVal)
+                        $(this).parent().siblings(".progress").find(".progress-bar").css("width", percentVal+ '%').attr("aria-valuenow", percentVal+ '%').text(percentVal+ '%');
+                        //progressBar.css("width", percentVal+ '%').attr("aria-valuenow", percentVal+ '%').text(percentVal+ '%');
+                        if (percentVal == 100) { alert("complete"); }
+                    }
+                 });
+             });
+         }, 10000);
+    });
+</script>
+
+<script>
+    $(document).ready(function(){
+        $(".run_now").click(function(){
+            var id = $(this).attr("param");
+            var csrftoken = Cookies.get('csrftoken');
+            function csrfSafeMethod(method) {
+                // these HTTP methods do not require CSRF protection
+                return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method)); }
+
+            $.ajaxSetup({
+                beforeSend: function(xhr, settings) {
+                    if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                        xhr.setRequestHeader("X-CSRFToken", csrftoken);
+                    }
+                }
+            });
+
+            $.ajax({
+                url: '/dashboard/scheduler_list',
+                type: 'POST',
+                async: false,
+                data: {'id':id, 'csrfmiddlewaretoken': "{{ csrftoken }}" },
+                //contentType: 'application/json',
+                dataType: 'json',
+                context: this,
+                success: function(json){
+                    console.log("successfull");
+                    //alert(json);
+                    var sched_id = json.sched_id;
+                    var sched_run_id = json.sched_run_id;
+                    //alert(sched_id + "," + sched_run_id);
+                    $(this).attr('run_id', sched_run_id);
+                    val  = $(this).attr('run_id');
+                    //alert (val);
+                }
+            });
+        });
+
+        $("#run_now").mouseover(function(){
+            $("#run_now").css("background-color", "yellow"); });
+    });
+</script>
+
+         <div class="table-responsive">
+            <table class="table table-striped">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Name</th>
+                  <th>Type</th>
+                  <th>Status</th>
+                  <th>Schedule</th>
+                </tr>
+              </thead>
+              <tbody>
+              {% for item in schedulerUIs %}
+                <tr>
+                  <td id="{{ item.sched_model.pk }}">{{ item.sched_model.pk }}</td>
+                  <td>{{ item.sched_model.name }}</td>
+                  <td>{{ item.sched_model.type }}</td>
+                  <td class="progress">
+                    <div class="progress">
+                        <div id="progress_{{item.sched_model.pk}}" class="progress-bar progress-bar-info" role="progressbar" aria-valuenow="50"
+                                 aria-valuemin="0" aria-valuemax="100" style="width:{{ item.latest_progress }}%"> {{ item.latest_progress }} % Complete (info)</div>
+                        </div>
+                  </td>
+                    <!-- status: pending, running, completed -->
+                    <td><button id="runnow_{{item.sched_model.pk}}" class="run_now" param = "{{item.sched_model.pk}}" run_id="{{item.latest_running.pk}}">Run Now</button></td>
+                </tr>
+              {% endfor %}
+             </tbody>
+            </table>
+         </div>
+    </form>
+{% endblock %}

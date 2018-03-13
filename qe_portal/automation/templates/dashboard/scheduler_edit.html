@@ -1,0 +1,25 @@
+{% extends 'dashboard/frame.html' %}
+
+{% block main_content %}
+{% load static %}
+
+<h1>Scheduler Edit</h1>
+    <form method="POST" class="post-form" action="{% url 'scheduler_edit' id %}">{% csrf_token %}
+         <div class="table-responsive">
+             {% for field in form %}
+                <div class="fieldWrapper">
+                <fieldset class="module aligned ">
+                    <div class="form-row field-type">
+                        {{ field.errors }}
+                        {{ field.label_tag }} {{ field }}
+                        {% if field.help_text %}
+                        <p class="help">{{ field.help_text|safe }}</p>
+                        {% endif %}
+                    </div>
+                </fieldset>
+                </div>
+             {% endfor %}
+         </div>
+        <input type="submit" value="Submit" />
+    </form>
+{% endblock %}

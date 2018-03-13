@@ -1,0 +1,37 @@
+{% extends 'dashboard/frame.html' %}
+
+{% block main_content %}
+    <h1>Run List</h1>
+    <form method="POST" class="post-form">{% csrf_token %}
+         <div class="table-responsive">
+            <table class="table table-striped">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Suite</th>
+                  <th>Schedule</th>
+                  <th>Result</th>
+                  <th>Start Time</th>
+                  <th>Status</th>
+                  <th>Progress %</th>
+                  <th>Details</th>
+                </tr>
+              </thead>
+              <tbody>
+              {% for run in runs %}
+                <tr>
+                  <td>{{ run.pk }}</td>
+                  <td>{{ run.suite.name }}</td>
+                  <td>{{ run.schedule.name }}</td>
+                  <td>{{ run.ret }} </td>
+                  <td>{{ run.start_time }} </td>
+                  <td>{{ run.status}} </td>
+                  <td>{{ run.progress}} </td>
+                  <td>details:{{ run.case_runnings}} </td>
+                </tr>
+              {% endfor %}
+             </tbody>
+            </table>
+         </div>
+    </form>
+{% endblock %}

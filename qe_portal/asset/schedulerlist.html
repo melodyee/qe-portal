@@ -1,0 +1,74 @@
+{% extends 'dashboard/frame.html' %}
+
+{% block main_content %}
+
+    <h1>Schedule List</h1>
+
+    <form method="POST" class="post-form">
+    {% csrf_token %}
+
+<script>
+    var jQuery = django.jQuery;
+    var $=jQuery;
+
+    $(document).ready(function(){
+        $(".runnow").click(function(){
+            var id = $(this).attr("param");
+            var csrftoken = Cookies.get('csrftoken');
+            function csrfSafeMethod(method) {
+                // these HTTP methods do not require CSRF protection
+                return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method)); }
+
+            $.ajaxSetup({
+                beforeSend: function(xhr, settings) {
+                    if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                        xhr.setRequestHeader("X-CSRFToken", csrftoken);
+                    }
+                }
+            });
+
+            $.ajax({
+                url: '/dashboard/scheduler_list',
+                type: 'POST',
+                async: false,
+                data: {'id':id, 'csrfmiddlewaretoken': "{{ csrftoken }}" },
+                dataType: 'json',
+                context: this,
+                success: function(json){
+                    console.log("successfull");
+                }
+            });
+        });
+
+        $(".runnow").mouseover(function(){
+            $("#run_now").css("background-color", "yellow"); });
+    });
+</script>
+
+         <div class="table-responsive">
+            <table class="table table-striped">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Name</th>
+                  <th>Type</th>
+                  <th>Status</th>
+                  <th>Schedule</th>
+                </tr>
+              </thead>
+              <tbody>
+              {% for item in schedulerUIs %}
+                <tr>
+                  <td>{{ item.sched_model.pk }}</td>
+                  <td>{{ item.sched_model.name }}</td>
+                  <td>{{ item.sched_model.type }}</td>
+                  <td>{{ item.sched_model.status}}</td>
+                    <!-- status: pending, running, completed -->
+                  <td><button id="runnow_{{item.sched_model.pk}}" class="runnow" param = "{{item.sched_model.pk}}" >Run Now</button></td>
+                </tr>
+              {% endfor %}
+             </tbody>
+            </table>
+         </div>
+    </form>
+{% endblock %}

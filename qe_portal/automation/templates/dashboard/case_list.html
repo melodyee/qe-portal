@@ -1,0 +1,233 @@
+{% extends 'dashboard/frame.html' %}
+
+{% block main_content %}
+
+<style>
+th {
+    word-wrap: break-word;
+    word-break: break-all;
+}
+
+td {
+    word-wrap: break-word;
+    word-break: break-all;
+}
+</style>
+
+<script>
+    var jQuery = django.jQuery;
+    var $=jQuery;
+
+//document Ready Function
+    $(document).ready(function(){
+
+//delete case
+
+        $(document).on("click", ".case_delete", function(){
+            var id = $(this).attr("param");
+            var csrftoken = Cookies.get('csrftoken');
+
+            function csrfSafeMethod(method) {
+                // these HTTP methods do not require CSRF protection
+                return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method)); }
+
+            $.ajaxSetup({
+                beforeSend: function(xhr, settings) {
+                    if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                        xhr.setRequestHeader("X-CSRFToken", csrftoken);
+                    }
+                }
+            });
+
+            $.ajax({
+                url: "{% url 'case_delete' %}" ,
+                type: 'POST',
+                data: {'id':id },
+                dataType: 'json',
+                context: this,
+                success: function(json){
+                    if(json.ret){
+                        console.log("Case:" + json.id + " deleted successfull!");
+                        alert("Case ID: [" + json.id + "] has been deleted!")}
+                    else{
+                        console.log("Case:" + json.id + " deleted failed!");
+                        alert("Case ID: [" + json.id + "] delete ERROR!")}
+                    location.reload();
+                }
+            });
+        });
+
+        $(".case_delete").mouseover(function(){$(this).css("cursor", "pointer"); });
+
+
+//case history//
+
+        $(".case_history").mouseover(function(){$(this).css("cursor", "pointer"); });
+
+        $(document).on("click", ".case_history", function(){
+            var id = $(this).attr("param");
+            var csrftoken = Cookies.get('csrftoken');
+
+            function csrfSafeMethod(method) {
+                // these HTTP methods do not require CSRF protection
+                return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method)); }
+
+            $.ajaxSetup({
+                beforeSend: function(xhr, settings) {
+                    if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                        xhr.setRequestHeader("X-CSRFToken", csrftoken);
+                    }
+                }
+            });
+
+            $.ajax({
+                url: "{% url 'case_history' %}" ,
+                type: 'POST',
+                data: {'id':id },
+                dataType: 'json',
+                context: this,
+                success: function(data){
+                    // for debug
+                    // alert(data.id);
+                    // alert(data.h_list);
+                    element = data.h_list;
+                    var table_header = "<table class='table table-striped table-bordered'><thead><tr>";
+                    table_header += "<th>ID</th>";
+                    table_header += "<th>Model</th>";
+                    table_header += "<th>Type</th>";
+                    table_header += "<th>ChangeReason</th>";
+                    table_header += "<th>User</th>";
+                    table_header += "<th>Date</th>";
+                    table_header += "</tr></thead><tbody>";
+                    var table_footer = "</tbody></table>";
+
+                    var html ="";
+                    data.h_list.forEach(function(element) {
+                        html += "<tr><td>"+ element.pk +"</td>";
+                        html += "<td>"+ element.model +"</td>";
+                        html += "<td>"+ element.fields.history_type +"</td>";
+                        html += "<td>"+ element.fields.history_change_reason +"</td>";
+                        html += "<td>"+ element.fields.history_user +"</td>";
+                        html += "<td>"+ element.fields.history_date +"</td></tr>";
+                        });
+
+                    var all = table_header +html+ table_footer;
+                    $('.modal-title').text('List of Editing History');
+                    $('#record_list').html(all);
+                    $('#modal-list').modal({
+                        show: true,
+                        autoOpen: true,
+                        draggable: true,
+                        resizable: true,
+                        width: "auto",
+                        position: { my: "top", at: "top", of: window }
+                         });
+                },
+
+            }); //end-ajax.
+        }); //end-document.
+
+
+//edit case//
+
+        $(document).on("click", ".case_edit", function(){
+            var id = $(this).attr("param");
+            if(id){
+                window.location = "/dashboard/case_edit/" + id + "/";
+            }
+         });
+
+        $(".case_edit").mouseover(function(){$(this).css("cursor", "pointer"); });
+
+//Document Ready Function End//
+    });
+</script>
+
+{{ form.media }}
+
+    <h1>Case List</h1>
+    <form method="POST" class="post-form">{% csrf_token %}
+         <div class="table-responsive">
+            <table class="table table-striped">
+            <!-- col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main -->
+              <thead>
+              <!--
+                <tr>
+                  <th class="col-sm-1 col-md-1">#</th>
+                  <th class="col-sm-1 col-md-1">Name</th>
+                  <th class="col-sm-1 col-md-1">Type</th>
+                  <th class="col-sm-1 col-md-1">Platform</th>
+                  <th class="col-sm-1 col-md-1">Cmd</th>
+                  <th class="col-sm-2 col-md-2" style="word-break:break-all;">Script</th>
+                  <th class="col-sm-2 col-md-2"> Description</th>
+                  <th class="col-sm-1 col-md-1">Timeout</th>
+                  <th class="col-sm-1 col-md-1">Operation</th>
+                </tr>
+                -->
+
+                <tr>
+                  <th style="width:5%">#</th>
+                  <th style="width:10%">Name</th>
+                  <th style="width:5%">Type</th>
+                  <th style="width:8%">Platform</th>
+                  <th style="width:8%">Cmd</th>
+                  <th style="width:30%">Script</th>
+                  <th style="width:20%"> Description</th>
+                  <th style="width:5%">Timeout</th>
+                  <th>Operation</th>
+                </tr>
+
+               </thead>
+              <tbody>
+              {% for case in cases %}
+                <tr>
+                  <td>{{ case.id }}</td>
+                  <td>{{ case.name }}</td>
+                  <td>{{ case.type}}</td>
+                  <td>{{ case.platform}}</td>
+                  <td>{{ case.cmd }} </td>
+                  <td>{{ case.script }} </td>
+                  <td>{{ case.description }} </td>
+                  <td>{{ case.timeout}} </td>
+                  <td>
+                      <span id="edit_{{ case.id }}" param="{{case.id}}" class="case_edit">
+                          <img class="case_edit" src="/static/dashboard/images/32x32/edit_case.png" alt="edit case" style="width:24px;height:24px;border:0;">
+                      </span>
+                      <span id="delete_{{ case.id }}" param="{{ case.id }}" class="case_delete">
+                          <img src="/static/dashboard/images/32x32/delete_case.png" alt="delete case" style="width:24px;height:24px;border:0;">
+                      </span>
+                      <span id="history_{{ case.id }}" param="{{ case.id }}" class="case_history">
+                          <img src="/static/dashboard/images/32x32/history.png" alt="case edit history" style="width:24px;height:24px;border:0;">
+                      </span>
+                   </td>
+                </tr>
+              {% endfor %}
+             </tbody>
+            </table>
+         </div>
+    </form>
+
+    <div class="modal fade" id="modal-list" role="dialog">
+      <div class="model-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+            <h3 class="modal-title">List of Editing History</h3>
+          </div>
+          <div class="modal-body form">
+
+            <form action="#" id="form" class="form-horizontal">
+              <div class="form-body">
+                <div id="record_list"> </div>
+              </div>
+            </form>
+
+            <div class="modal-footer">
+               <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div><!-- /.footer -->
+
+          </div><!-- /.body form -->
+        </div><!-- /.modal-content -->
+      </div><!-- /.model-dialog -->
+    </div><!-- /.modal-list -->
+{% endblock %}

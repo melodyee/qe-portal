@@ -1,0 +1,88 @@
+{% extends 'dashboard/frame.html' %}
+
+{% block main_content %}
+
+<script>
+    var jQuery = django.jQuery;
+    var $=jQuery;
+
+//document Ready Function
+    $(document).ready(function(){
+
+//suite run detail
+
+        $(document).on("click", ".suite_run_detail", function(){
+            var id = $(this).attr("param");
+            if(id){
+                window.location = "/dashboard/detail_list?id=" + id;
+            }
+         });
+
+        $(".suite_run_detail").mouseover(function(){$(this).css("cursor", "pointer"); });
+
+//Document Ready Function End//
+    });
+</script>
+
+
+    <h1>Run List</h1>
+    <form method="POST" class="post-form">{% csrf_token %}
+         <div class="table-responsive">
+            <table class="table table-striped">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Suite</th>
+                  <th>Schedule</th>
+                  <th>Result</th>
+                  <th>Start Time</th>
+                  <th>Run Time</th>
+                  <th>Status</th>
+                  <th>Progress %</th>
+                  <th>Ratio</th>
+                  <th>Details</th>
+                </tr>
+                </tr>
+              </thead>
+              <tbody>
+
+              {% load model_tags %}
+              {% for run in runs %}
+                <tr>
+                  <td>{{ run.pk }}</td>
+                  <td>{{ run.suite.name }}</td>
+                  <td>{{ run.schedule.name }}</td>
+                  <td>
+                      {% if run.ret %}
+                      <span class="suite_run_ret">
+                          <img src="/static/dashboard/images/32x32/failed.png" alt="failed" style="width:18px;height:18px;border:0;">
+                      </span>
+                      {% else %}
+                      <span class="suite_run_ret">
+                          <img src="/static/dashboard/images/32x32/success.png" alt="successful" style="width:18px;height:18px;border:0;">
+                      </span>
+                      {% endif %}
+                  </td>
+                  <td>{{ run.start_time }} </td>
+                  <td>{{ run.run_time }} </td>
+                  <td>{{ run.status}} </td>
+                  <td>{{ run.progress}} </td>
+                  <td>
+                      {% case_run_successandfailure run.case_runnings as ret %}
+                      <span>Success:{{ ret.0 }}</span>
+                      <span>|</span>
+                      <span>Failure:{{ ret.1 }}</span>
+                  </td>
+                  <td>
+                      <span id="detail_{{ run.pk }}" param="{{ run.pk }}" class="suite_run_detail">
+                          <img class="case_edit" src="/static/dashboard/images/32x32/details.png" alt="suite run details" style="width:24px;height:24px;border:0;">
+                      </span>
+                  </td>
+
+                </tr>
+              {% endfor %}
+             </tbody>
+            </table>
+         </div>
+    </form>
+{% endblock %}
