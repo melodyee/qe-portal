@@ -23,7 +23,7 @@ python-nmcli==0.1.1
 pytz==2017.2
 redis==2.10.5
 requests==2.18.1
-urllib3==1.21.1
+urllib3==1.26.5
 vine==1.1.3
 virtualenv==15.1.0
 wxPython==3.0.2.0
