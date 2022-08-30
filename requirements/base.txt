@@ -8,7 +8,7 @@ django-bootstrap3==8.2.3
 django-jquery==3.1.0
 idna==2.5
 kombu==4.0.2
-mod-wsgi==4.5.15
+mod-wsgi==4.9.3
 MySQL-python==1.2.5
 olefile==0.44
 pika==0.10.0
